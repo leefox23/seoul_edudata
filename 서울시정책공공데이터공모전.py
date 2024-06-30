@@ -24,11 +24,11 @@ from pyproj import Transformer
 import math
 
 # 서울시 구별 경계 데이터 로드
-seoul_geo = gpd.read_file('C:/Users/godbl/Downloads/독수리들/작업용xlsx/서울시_시군구.geojson')
+seoul_geo = gpd.read_file('경로/서울시_시군구.geojson')
 
 # CSV 파일 데이터 읽기
-#csv_file = 'C:/Users/godbl/Downloads/독수리들/작업용xlsx/special_lalo2.csv' # 특수학교만 고려함
-csv_file = 'C:/Users/godbl/Downloads/독수리들/작업용xlsx/special_lalo.csv' # 특수학급이 있는 학교 전체를 고려함
+#csv_file = '경로/special_lalo2.csv' # 특수학교만 고려함
+csv_file = '경로/special_lalo.csv' # 특수학급이 있는 학교 전체를 고려함
 
 df = pd.read_csv(csv_file)
 
@@ -90,11 +90,11 @@ def rgb_to_hex(rgb):
 color_dict = {df_gu['행정구'][i]: rgb_to_hex(colors[i]) for i in range(len(df_gu))}
 
 
-##############################K-clustering 코드##############################
+##############################↓↓K-clustering 코드↓↓##############################
 # 최적의 클러스터링 결과 선택
 best_kmeans = None
 best_score = -1
-num_clusters = 3
+num_clusters = 5
 
 for _ in range(100):  # 100번 반복
     kmeans = KMeans(n_clusters=num_clusters, random_state=None)
@@ -169,10 +169,10 @@ except Exception as e:
     import traceback
     traceback.print_exc()
 
-##############################K-clustering 코드##############################
+##############################↑↑K-clustering 코드↑↑##############################
 
 
-##################################KDE 코드##################################
+##################################↓↓KDE 코드↓↓##################################
 # KDE 적용 (전체 데이터에 대해)
 kde = KernelDensity(bandwidth=0.01)
 kde.fit(df[['Latitude', 'Longitude']].values)
@@ -194,11 +194,11 @@ heatmap_layer = folium.raster_layers.ImageOverlay(
     colormap=lambda x: (1, 0, 0, x),
 )
 seoul_map.add_child(heatmap_layer)
-##################################KDE 코드##################################
+##################################↑↑KDE 코드↑↑##################################
 
 
 CircleMarkerCheck = False # 마커 생성 코드 여부 확인 변수
-################################마커 생성 코드################################
+################################↓↓마커 생성 코드↓↓################################
 # 구별로 마커 생성
 
 for idx, row in df.iterrows():
@@ -210,10 +210,10 @@ for idx, row in df.iterrows():
         icon_color = color_dict[administrative_district]
         folium.CircleMarker(location=coords, radius=log_special_classrooms, popup=address, color=icon_color, fill=True, fill_color=icon_color).add_to(seoul_map)
         CircleMarkerCheck = True
-################################마커 생성 코드################################
+################################↑↑마커 생성 코드↑↑################################
 
 
-###############################파일명 생성 코드###############################
+###############################↓↓파일명 생성 코드↓↓###############################
 # 파일명 생성에 필요한 정보들
 map_color = '회색' if 'cartodbpositron' in str(seoul_map) else '기본'
 school_type = '특수' if csv_file.endswith('special_lalo2.csv') else '전체'
@@ -246,7 +246,7 @@ def create_filename(map_color, school_type, num_clusters, kde_applied):
 
 # 파일명 생성
 output_filename = create_filename(map_color, school_type, num_clusters, kde_applied)
-###############################파일명 생성 코드###############################
+###############################↑↑파일명 생성 코드↑↑###############################
 
 
 # 현재 작업 디렉토리 출력
